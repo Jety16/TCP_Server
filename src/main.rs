@@ -1,8 +1,8 @@
 use std::io::{Read, Write};
-use std::net::{TcpListener, TcpStream};
+use std::net::{TcpListener, TcpStream, SocketAddr};
 
 fn handle_client(mut stream: TcpStream) {
-    let mut buffer = [0; 1024]; // Fixed syntax error here
+    let mut buffer = [0; 1024]; 
 
     stream.read(&mut buffer).expect("Failed to read from client!");
 
@@ -14,14 +14,19 @@ fn handle_client(mut stream: TcpStream) {
 }
 
 // Entry point
-fn main() {
-    let listener = TcpListener::bind("127.0.0.1:8080").expect("Failed to bind to address");
-    println!("Server listening on 127.0.0.1:8080");
+fn main() {    
+    let addrs = [
+        SocketAddr::from(([127, 0, 0, 1], 8080)),
+        SocketAddr::from(([127, 0, 0, 1], 443)),
+    ];
+    let listener = TcpListener::bind(&addrs[..]).unwrap();
+
+    println!("Server listening on {}", listener.local_addr().unwrap());
 
     for stream in listener.incoming() {
         match stream {
             Ok(stream) => {
-                std::thread::spawn(move || handle_client(stream)); // Fixed path separator error and added move keyword
+                std::thread::spawn(move || handle_client(stream)); 
             }
             Err(e) => {
                 eprintln!("Failed to establish connection: {}", e);
